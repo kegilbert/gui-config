@@ -63,6 +63,9 @@ class ModuleBox():
             for param in self.config_params:
                 param['widget'].config(state=DISABLED)
 
+def save_config():
+    print("Saving config")
+
 def main():
     module_paths = ['platform/mbed_lib.json', 'drivers/mbed_lib.json', 'events/mbed_lib.json', 'rtos/mbed_lib.json']
 
@@ -81,6 +84,10 @@ def main():
                 parameters.append(ConfigParamStruct(key, True if value else False, "Enable/Disable this module"))  # present flag
 
             ModuleBox(mod[0:-14], i, parameters)
+
+
+        save_button = Button(root, text="Save", width=12, height=2, bg="green", activebackground="darkgreen", command=save_config)
+        save_button.grid(row=99, column=99, sticky=NW)
 
 #    ModuleBox("Events", 1, [
 #                                ConfigParamStruct("test1", "zoopdop"),
