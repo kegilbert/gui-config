@@ -1,3 +1,4 @@
+import json
 from Tkinter import *
 
 ################################################################
@@ -8,8 +9,10 @@ class ConfigParamStruct():
         self.name = name
         if type(var) == str:
             self.var = StringVar()
-        else:
+        elif type(var) == int:
             self.var = IntVar()
+        else:
+            self.var = BooleanVar()
 
         self.var.set(var)
 
@@ -32,7 +35,9 @@ class ModuleBox():
             self.config_param_states.append(IntVar() if type(param.var.get()) != str else StringVar())
             self.config_param_states[-1].set(param.var.get())
 
-            if type(param.var.get()) == str:
+            format = type(param.var.get())
+
+            if (format == str or format == int):
                 self.config_params.append(Label(_config_lf, text=param.name))
                 self.config_params[-1].grid(row=i, column=1, sticky=E)
                 self.config_params.append(Entry(_config_lf, textvariable=self.config_param_states[-1]))
@@ -50,46 +55,56 @@ class ModuleBox():
                 param.config(state=DISABLED)
 
 def main():
-    ModuleBox("Drivers", 0, [
-                                ConfigParamStruct("test1", 0),
-                                ConfigParamStruct("test2", "beepboop"),
-                                ConfigParamStruct("test3", 1),
-                                ConfigParamStruct("test4", "Zipzop"),
-                                ConfigParamStruct("test5", 1)
-                            ]
-             )
+    module_paths = ['platform/mbed_lib.json', 'drivers/mbed_lib.json', 'events/mbed_lib.json', 'rtos/mbed_lib.json']
 
-    ModuleBox("Events", 1, [
-                                ConfigParamStruct("test1", "zoopdop"),
-                                ConfigParamStruct("test2", 1),
-                                ConfigParamStruct("test3", 0),
-                                ConfigParamStruct("test4", 1)
-                            ]
-             )
+    for i, mod in enumerate(module_paths):
+        print("Collecting: %s" % mod[0:-14])
+        f = open(mod, 'r')
+        config = json.loads(f.read()).get('config')
+        f.close()
+        parameters = []
+        print(config)
+        for key, value in config.iteritems():
+            try:
+                print(("Key: %s, Type: " % key), type(value.get('value')))
+                parameters.append(ConfigParamStruct(key, value.get('value')))
+            except AttributeError:
+                print(("Key: %s, Type: " % key), type(value))
+                parameters.append(ConfigParamStruct(key, True if value else False))  # present flag
 
-    ModuleBox("RTOS", 2, [
-                                ConfigParamStruct("test1", "rtos1"),
-                                ConfigParamStruct("test2", 1),
-                                ConfigParamStruct("test3", 0),
-                                ConfigParamStruct("test4", 1),
-                                ConfigParamStruct("test5", 1),
-                                ConfigParamStruct("test6", 0),
-                                ConfigParamStruct("test7", 0),
-                                ConfigParamStruct("test8", 0),
-                                ConfigParamStruct("test9", 1),
-                                ConfigParamStruct("test10", "115200"),
-                                ConfigParamStruct("test11", "rtos3"),
-                            ]
-             )
+            ModuleBox(mod[0:-14], i, parameters)
 
-    ModuleBox("Platform", 4, [
-                                ConfigParamStruct("test1", 1),
-                                ConfigParamStruct("test2", 0),
-                                ConfigParamStruct("test3", 1),
-                                ConfigParamStruct("test4", 0),
-                                ConfigParamStruct("test5", 0),
-                            ]
-             )
+#    ModuleBox("Events", 1, [
+#                                ConfigParamStruct("test1", "zoopdop"),
+#                                ConfigParamStruct("test2", 1),
+#                                ConfigParamStruct("test3", 0),
+#                                ConfigParamStruct("test4", 1)
+#                            ]
+#             )
+#
+#    ModuleBox("RTOS", 2, [
+#                                ConfigParamStruct("test1", "rtos1"),
+#                                ConfigParamStruct("test2", True),
+#                                ConfigParamStruct("test3", False),
+#                                ConfigParamStruct("test4", True),
+#                                ConfigParamStruct("test5", True),
+#                                ConfigParamStruct("test6", False),
+#                                ConfigParamStruct("test7", False),
+#                                ConfigParamStruct("test8", True),
+#                                ConfigParamStruct("test9", False),
+#                                ConfigParamStruct("test10", 115200),
+#                                ConfigParamStruct("test11", 7746),
+#                            ]
+#             )
+#
+#    ModuleBox("Platform", 4, [
+#                                ConfigParamStruct("test1", 1),
+#                                ConfigParamStruct("test2", 0),
+#                                ConfigParamStruct("test3", 1),
+#                                ConfigParamStruct("test4", 0),
+#                                ConfigParamStruct("test5", 0),
+#                            ]
+#             )
 
     root.mainloop()
 
