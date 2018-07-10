@@ -1,5 +1,13 @@
 import json
-from Tkinter import *
+import sys
+import glob
+import fnmatch
+import os
+
+if sys.version_info[0] >= 3:
+    from tkinter import *
+else:
+    from Tkinter import *
 
 ################################################################
 root = Tk()
@@ -67,6 +75,10 @@ def save_config():
     print("Saving config")
 
 def main():
+    if sys.version_info[0] >= 3:
+        for filename in glob.iglob('features/**/mbed_lib.json', recursive=True):
+            print(filename)
+
     module_paths = ['platform/mbed_lib.json', 'drivers/mbed_lib.json', 'events/mbed_lib.json', 'rtos/mbed_lib.json']
 
     help_box.grid(row=99, column=0, sticky=S, columnspan = 6)
@@ -76,8 +88,14 @@ def main():
         config = json.loads(f.read()).get('config')
         f.close()
         parameters = []
+        config_iteritems = {}
 
-        for key, value in config.iteritems():
+        if sys.version_info[0] < 3:
+            config_iteritems = config.iteritems()
+        else:
+            config_iteritems = config.items()
+
+        for key, value in config_iteritems:
             try:
                 parameters.append(ConfigParamStruct(key, value.get('value'), value.get('help')))
             except AttributeError:
@@ -86,40 +104,8 @@ def main():
             ModuleBox(mod[0:-14], i, parameters)
 
 
-        save_button = Button(root, text="Save", width=12, height=2, bg="green", activebackground="darkgreen", command=save_config)
-        save_button.grid(row=99, column=99, sticky=NW)
-
-#    ModuleBox("Events", 1, [
-#                                ConfigParamStruct("test1", "zoopdop"),
-#                                ConfigParamStruct("test2", 1),
-#                                ConfigParamStruct("test3", 0),
-#                                ConfigParamStruct("test4", 1)
-#                            ]
-#             )
-#
-#    ModuleBox("RTOS", 2, [
-#                                ConfigParamStruct("test1", "rtos1"),
-#                                ConfigParamStruct("test2", True),
-#                                ConfigParamStruct("test3", False),
-#                                ConfigParamStruct("test4", True),
-#                                ConfigParamStruct("test5", True),
-#                                ConfigParamStruct("test6", False),
-#                                ConfigParamStruct("test7", False),
-#                                ConfigParamStruct("test8", True),
-#                                ConfigParamStruct("test9", False),
-#                                ConfigParamStruct("test10", 115200),
-#                                ConfigParamStruct("test11", 7746),
-#                            ]
-#             )
-#
-#    ModuleBox("Platform", 4, [
-#                                ConfigParamStruct("test1", 1),
-#                                ConfigParamStruct("test2", 0),
-#                                ConfigParamStruct("test3", 1),
-#                                ConfigParamStruct("test4", 0),
-#                                ConfigParamStruct("test5", 0),
-#                            ]
-#             )
+    save_button = Button(root, text="Save", width=12, height=2, bg="green", activebackground="darkgreen", command=save_config)
+    save_button.grid(row=99, column=99, sticky=NW)
 
     root.mainloop()
 
