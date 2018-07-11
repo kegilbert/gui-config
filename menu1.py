@@ -13,6 +13,7 @@ else:
 root = Tk()
 help_text = StringVar()
 help_box = Label(root, textvariable=help_text, wraplength=750, justify=LEFT)
+modules = []
 
 class ConfigParamStruct():
     def __init__(self, name, var, help):
@@ -32,6 +33,7 @@ class ModuleBox():
         self.module_enabled = IntVar()
         self.config_params  = []
         self.config_param_states = []
+        self.config_param_init_states = []
         self.module_enabled.set(1)
 
         _module_lf = LabelFrame(root, text=module_name)
@@ -45,6 +47,8 @@ class ModuleBox():
         for i, param in enumerate(config_params):
             self.config_param_states.append(IntVar() if type(param.var.get()) != str else StringVar())
             self.config_param_states[-1].set(param.var.get())
+            self.config_param_init_states.append(IntVar() if type(param.var.get()) != str else StringVar())
+            self.config_param_init_states[-1].set(param.var.get())
 
             format = type(param.var.get())
 
@@ -57,6 +61,14 @@ class ModuleBox():
 
             self.config_params[-1]['widget'].bind("<Enter>", self.on_enter)
             self.config_params[-1]['widget'].grid(row=i, column=0, sticky=W)
+
+    def get_state_diff(self):
+        diff = []
+        for i, state in enumerate(self.config_param_init_states):
+            if state.get() != self.config_param_states[i].get():
+                diff.append(self.config_params[i]['widget'].cget('text'))
+
+        print(diff)
 
     def on_enter(self, event):
         for widget in self.config_params:
@@ -73,13 +85,18 @@ class ModuleBox():
 
 def save_config():
     print("Saving config")
+    for mod in modules:
+        mod.get_state_diff()
 
 def main():
     if sys.version_info[0] >= 3:
-        for filename in glob.iglob('features/**/mbed_lib.json', recursive=True):
+        for filename in glob.iglob('./**/mbed_lib.json', recursive=True):
             print(filename)
 
     module_paths = ['platform/mbed_lib.json', 'drivers/mbed_lib.json', 'events/mbed_lib.json', 'rtos/mbed_lib.json']
+
+    if os.path.isfile('mbed_app.json'):
+        module_paths.append('mbed_app.json')
 
     help_box.grid(row=99, column=0, sticky=S, columnspan = 6)
 
@@ -101,7 +118,7 @@ def main():
             except AttributeError:
                 parameters.append(ConfigParamStruct(key, True if value else False, "Enable/Disable this module"))  # present flag
 
-            ModuleBox(mod[0:-14], i, parameters)
+        modules.append(ModuleBox(mod[0:-14], i, parameters))
 
 
     save_button = Button(root, text="Save", width=12, height=2, bg="green", activebackground="darkgreen", command=save_config)
