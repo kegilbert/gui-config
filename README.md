@@ -17,4 +17,4 @@ Select save to update the .mbedignore and mbed_app.json file with your settings.
 
 ## Notes
 
-This has not been fully tested on Python3. You may need to run `sudo apt-get install python3-tk` in some environments.
+You may need to run `sudo apt-get install python3-tk` in some environments (Linux distrubutions in particular it seems like) for Python3 support.
