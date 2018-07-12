@@ -19,14 +19,7 @@ class ConfigParamStruct():
     def __init__(self, name, var, help):
         self.name = name
         self.help = help
-        if type(var) == str:
-            self.var = StringVar()
-        elif type(var) == int:
-            self.var = IntVar()
-        else:
-            self.var = BooleanVar()
-
-        self.var.set(var)
+        self.var  = var
 
 class ModuleBox():
     def __init__(self, module_name, positional_index, config_params = []):
@@ -45,12 +38,20 @@ class ModuleBox():
         _module_cb.grid(row=0, column=0)
 
         for i, param in enumerate(config_params):
-            self.config_param_states.append(IntVar() if type(param.var.get()) != str else StringVar())
-            self.config_param_states[-1].set(param.var.get())
-            self.config_param_init_states.append(IntVar() if type(param.var.get()) != str else StringVar())
-            self.config_param_init_states[-1].set(param.var.get())
+            if type(param.var) == str:
+                self.config_param_states.append(StringVar())
+                self.config_param_init_states.append(StringVar())
+            elif type(param.var) == int:
+                self.config_param_states.append(IntVar())
+                self.config_param_init_states.append(IntVar())
+            else:
+                self.config_param_states.append(BooleanVar())
+                self.config_param_init_states.append(BooleanVar())
 
-            format = type(param.var.get())
+            self.config_param_states[-1].set(param.var)
+            self.config_param_init_states[-1].set(param.var)
+
+            format = type(param.var)
 
             if (format == str or format == int):
                 self.config_params.append({'widget': Label(_config_lf, text=param.name), 'help': param.help})
