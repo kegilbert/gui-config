@@ -3,11 +3,7 @@ import sys
 import glob
 import fnmatch
 import os
-
-if sys.version_info[0] >= 3:
-    from tkinter import *
-else:
-    from Tkinter import *
+from tkinter import *
 
 ################################################################
 root = Tk()
@@ -68,6 +64,7 @@ class ModuleBox():
         for i, state in enumerate(self.config_param_init_states):
             if state.get() != self.config_param_states[i].get():
                 diff.append(self.config_params[i]['widget'].cget('text'))
+                #diff.append(self.config_params[i]['widget'].cget('variable'))
 
         print(diff)
 
